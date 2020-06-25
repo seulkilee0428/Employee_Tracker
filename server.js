@@ -58,7 +58,105 @@ function start() {
                 updateRole();
                 break;
             case "EXIT":
-                return;
+                quit();
         };
     });
 };
+
+function viewAllEmployee() {
+    const queryString = `SELECT 
+   employees.id, 
+   employees.first_name,
+   employees.last_name,
+   roles.title,
+   department.name,
+   roles.salary,
+   CONCAT(manager.first_name, ' ', manager.last_name) as manager  
+   FROM employees
+   LEFT JOIN roles
+   ON employees.role_id = roles.id
+   LEFT JOIN department
+   ON roles.department_id = department.id
+   LEFT JOIN employees manager
+   ON manager.id = employees.manager_id;`
+
+    connection.query(queryString, function (err, res) {
+        if (err) throw err;
+        console.table(res);
+        start();
+    })
+}
+
+function viewByDept() {
+    connection.query("SELECT * FROM department;", function (err, res) {
+        if (err) throw err;
+        console.log(res)
+        start();
+    })
+}
+
+function veiwByRole() {
+    connection.query("SELECT * FROM roles;", function (err, res) {
+        if (err) throw err;
+        console.log(res)
+        start();
+    })
+}
+
+function addEmployee() {
+    inquirer.prompt([
+        {
+            type: "input",
+            name: "firstName",
+            message: "What is the first name of new employee? "
+        },
+        {
+            type: "input",
+            name: "lastName",
+            message: "What is the last name of new employee?"
+        },
+        {
+            type: "input",
+            name: "newEmpDept",
+            message: "What is the Departmet ID for the new employee?"
+        }
+    ]).then(function (answer) {
+        const newEmpFN = answer.firstName
+        const newEmpLN = answer.lastName
+        const newEmpDeptID = answer.newEmpDept
+        const newQuery = connection.query("INSERT INTO employees SET ?",
+            [
+                {
+                    first_name: newEmpFN,
+                    last_name: newEmpLN,
+                    role_id: newEmpDeptID
+
+                }
+            ],
+            function (err, res) {
+                if (err) throw err
+                console.log(res)
+            });
+        console.log("the query is", newQuery.sql)
+    }).then(function () {
+
+    });
+    start();
+}
+
+// function addDept() {
+//     inquirer.prompt([
+//         {
+//             type: "input",
+//             name: "addDept",
+//             message: ""
+//         }
+//     ])
+// }
+
+function quit() {
+    console.log("Goodbye!");
+    process.exit();
+};
+
+start();

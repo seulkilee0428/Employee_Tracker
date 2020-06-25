@@ -1,17 +1,17 @@
 -- Drops the employeesDB if it already exists --
-DROP DATABASE IF EXISTS employeesDB
+DROP DATABASE IF EXISTS employeesDB;
 
 -- Create the database employeesDB and specified it for use.
-CREATE DATABASE employeesDB
+CREATE DATABASE employeesDB;
 
-USE employeesDB
+USE employeesDB;
 
 
 -- Create the table department
 
 CREATE TABLE department(
  id int NOT NULL AUTO_INCREMENT,
- department_name VARCHAR(30),
+ name VARCHAR(30),
  PRIMARY KEY (id)
 );
 -- Create the table roles
@@ -21,7 +21,8 @@ CREATE TABLE roles (
     title varchar(30),
     salary DECIMAL (10, 4) NOT NULL,
     department_id INT(10),
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    constraint fk_department foreign key (department_id) references department(id)
 );
 
 -- Create the table employees
@@ -31,6 +32,11 @@ CREATE TABLE employees (
   last_name varchar(30) NOT NULL,
   role_id  INT(10) NOT NULL,
   manager_id INT(10),
-  PRIMARY KEY (id)
+  PRIMARY KEY (id),
+  CONSTRAINT fk_role FOREIGN KEY (role_id)
+  REFERENCES roles(id),
+  CONSTRAINT fk_manager FOREIGN KEY (manager_id)
+  REFERENCES employees(id)
+  ON DELETE CASCADE
 );
 
