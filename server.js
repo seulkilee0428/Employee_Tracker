@@ -45,7 +45,7 @@ function start() {
             case "View All Employees by Role":
                 veiwByRole();
                 break;
-            case "Add Add Emplyee":
+            case "Add Emplyee":
                 addEmployee();
                 break;
             case "Add Department":
@@ -117,31 +117,25 @@ function addEmployee() {
         },
         {
             type: "input",
-            name: "newEmpDept",
-            message: "What is the Departmet ID for the new employee?"
+            name: "newRoleID",
+            message: "What is the role ID for the new employee?"
         }
     ]).then(function (answer) {
-        const newEmpFN = answer.firstName
-        const newEmpLN = answer.lastName
-        const newEmpDeptID = answer.newEmpDept
-        const newQuery = connection.query("INSERT INTO employees SET ?",
-            [
-                {
-                    first_name: newEmpFN,
-                    last_name: newEmpLN,
-                    role_id: newEmpDeptID
+        connection.query("INSERT INTO employees SET ?",
+            {
+                first_name: answer.firstName,
+                last_name: answer.lastName,
+                role_id: answer.newRoleID
 
-                }
-            ],
-            function (err, res) {
-                if (err) throw err
-                console.log(res)
-            });
-        console.log("the query is", newQuery.sql)
-    }).then(function () {
+            },
+            function (err) {
+                if (err) throw err;
+                console.log("Your new employee was added!");
+                start();
+            }
+        );
 
     });
-    start();
 }
 
 // function addDept() {
