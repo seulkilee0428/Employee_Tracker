@@ -23,19 +23,19 @@ connection.connect(function (err) {
     start()
 });
 
-// Prompts the user what action they would like to take
+// Prompts the user 
 
 function start() {
     inquirer.prompt([
         {
             type: "list",
-            name: "action",
+            name: "start",
             message: "What would you like to do? ",
-            choices: ["View All Employees", "View All Employees by Department", "View All Employees by Role", "Add Emplyee", "Add Department", "Add Role", "Update Employee Role", "EXIT"]
+            choices: ["View All Employees", "View All Employees by Department", "View All Employees by Role", "Add Employee", "Add Department", "Add Role", "Update Employee Role", "EXIT"]
 
         }
     ]).then(function (res) {
-        switch (res.action) {
+        switch (res.start) {
             case "View All Employees":
                 viewAllEmployee();
                 break;
@@ -45,7 +45,7 @@ function start() {
             case "View All Employees by Role":
                 veiwByRole();
                 break;
-            case "Add Emplyee":
+            case "Add Employee":
                 addEmployee();
                 break;
             case "Add Department":
@@ -130,7 +130,7 @@ function addEmployee() {
             },
             function (err) {
                 if (err) throw err;
-                console.log("Your new employee was added!");
+                console.log("Your new employee has been added!");
                 start();
             }
         );
@@ -138,15 +138,94 @@ function addEmployee() {
     });
 }
 
-// function addDept() {
-//     inquirer.prompt([
-//         {
-//             type: "input",
-//             name: "addDept",
-//             message: ""
-//         }
-//     ])
-// }
+function addDept() {
+    inquirer.prompt([
+        {
+            type: "input",
+            name: "addDept",
+            message: "What is the name of the department you want to add?"
+        }
+    ]).then(function (answer) {
+        connection.query("INSERT INTO department SET ?",
+            {
+                name: answer.addDept,
+            },
+            function (err) {
+                if (err) throw err;
+                console.log("Your new department has been added!");
+                start();
+            }
+        );
+    });
+}
+
+function addRole() {
+    inquirer.prompt([
+        {
+            type: "input",
+            name: "addTitle",
+            message: "Which title of the role you want to add?"
+        },
+        {
+            type: "input",
+            name: "addSalary",
+            message: "What is the salary of the new role? "
+        },
+        {
+            type: "input",
+            name: "deptID",
+            message: "What is the department ID of the new role?"
+        }
+    ]).then(function (answer) {
+        connection.query("INSERT INTO roles SET ? ",
+            {
+                title: answer.addTitle,
+                salary: answer.addSalary,
+                department_id: answer.deptID
+            },
+            function (err) {
+                if (err) throw err;
+                console.log("Your new role has been added! ")
+                start();
+            }
+        );
+    });
+}
+
+function updateRole() {
+    inquirer.prompt([
+        {
+            type: "input",
+            name: "updateLN",
+            message: "What is the last name of the employee?"
+        },
+        {
+            type: "number",
+            default: 0,
+            name: "newRole",
+            message: "what is the new role id for the employee?"
+        }
+    ]).then(function (answer) {
+        const getEmLN = answer.updateLN
+        const changeEmpRole = answer.newRole
+        connection.query("UPDATE employees SET? WHERE? ",
+            [
+                {
+                    role_id: changeEmpRole
+                },
+                {
+                    last_name: getEmLN
+                }
+            ],
+            function (err) {
+                if (err) throw err
+                console.log("Emplyees new role has been updated!")
+                start();
+            }
+        )
+
+    })
+}
 
 function quit() {
     console.log("Goodbye!");
