@@ -1,4 +1,4 @@
-9use employeesDB;
+use employeesDB;
 
 INSERT INTO department
     (name)

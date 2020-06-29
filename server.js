@@ -31,7 +31,7 @@ function start() {
             type: "list",
             name: "start",
             message: "What would you like to do? ",
-            choices: ["View All Employees", "View All Employees by Department", "View All Employees by Role", "Add Employee", "Add Department", "Add Role", "Update Employee Role", "EXIT"]
+            choices: ["View All Employees", "View All Employees by Department", "View All Employees by Role", "Add Employee", "Add Department", "Add Role", "Update Employee Role", "Remove Employee", "Remove Department", "Remove Role", "EXIT"]
 
         }
     ]).then(function (res) {
@@ -56,6 +56,15 @@ function start() {
                 break;
             case "Update Employee Role":
                 updateRole();
+                break;
+            case "Remove Employee":
+                removeEmployee();
+                break;
+            case "Remove Department":
+                removeDept();
+                break;
+            case "Remove Role":
+                removeRole();
                 break;
             case "EXIT":
                 quit();
@@ -82,6 +91,7 @@ function viewAllEmployee() {
 
     connection.query(queryString, function (err, res) {
         if (err) throw err;
+        console.log("\n");
         console.table(res);
         start();
     })
@@ -90,7 +100,8 @@ function viewAllEmployee() {
 function viewByDept() {
     connection.query("SELECT * FROM department;", function (err, res) {
         if (err) throw err;
-        console.log(res)
+        console.log("\n");
+        console.table(res);
         start();
     })
 }
@@ -98,7 +109,8 @@ function viewByDept() {
 function veiwByRole() {
     connection.query("SELECT * FROM roles;", function (err, res) {
         if (err) throw err;
-        console.log(res)
+        console.log("\n");
+        console.table(res);
         start();
     })
 }
@@ -128,8 +140,10 @@ function addEmployee() {
                 role_id: answer.newRoleID
 
             },
-            function (err) {
+            function (err, res) {
                 if (err) throw err;
+                console.log("\n");
+                console.table(res);
                 console.log("Your new employee has been added!");
                 start();
             }
@@ -150,8 +164,10 @@ function addDept() {
             {
                 name: answer.addDept,
             },
-            function (err) {
+            function (err, res) {
                 if (err) throw err;
+                console.log("\n");
+                console.table(res);
                 console.log("Your new department has been added!");
                 start();
             }
@@ -183,8 +199,10 @@ function addRole() {
                 salary: answer.addSalary,
                 department_id: answer.deptID
             },
-            function (err) {
+            function (err, res) {
                 if (err) throw err;
+                console.log("\n");
+                console.table(res);
                 console.log("Your new role has been added! ")
                 start();
             }
@@ -217,8 +235,10 @@ function updateRole() {
                     last_name: getEmLN
                 }
             ],
-            function (err) {
+            function (err, res) {
                 if (err) throw err
+                console.log("\n");
+                console.table(res);
                 console.log("Emplyees new role has been updated!")
                 start();
             }
@@ -226,6 +246,108 @@ function updateRole() {
 
     })
 }
+
+function removeEmployee() {
+    connection.query("SELECT CONCAT(first_name, ' ', last_name) AS name FROM employees", function (err, result) {
+        if (err) throw err;
+        console.log("\n");
+        console.table(result);
+
+        var employees = [];
+        for (var i = 0; i < result.length; i++) {
+            employees.push(result[i].name)
+        }
+        inquirer.prompt([
+            {
+                type: "list",
+                name: "removeEmp",
+                message: "Select the employee you want to remove. ",
+                choices: employees
+
+            }
+        ]).then(function (answer) {
+            connection.query("SELECT id FROM employees WHERE CONCAT(first_name, ' ', last_name) = ?", [answer.removeEmp], function (err, res) {
+                if (err) throw err;
+
+                connection.query("DELETE FROM employees WHERE id=? ", [res[0].id], function (err) {
+                    if (err) throw err;
+                });
+
+                console.log("\n");
+                console.table(res);
+                console.log("Employee has been removed!");
+                start();
+
+            });
+
+        });
+    });
+
+}
+
+function removeDept() {
+    connection.query("SELECT name FROM department", function (err, result) {
+        if (err) throw err;
+        console.log("\n");
+        console.table(result);
+
+        var department = [];
+        for (var i = 0; i < result.length; i++) {
+            department.push(result[i].name)
+        }
+        inquirer.prompt([
+            {
+                type: "list",
+                name: "removeDept",
+                message: "Which department do you want to remove?",
+                choices: department
+            }
+        ]).then(function (answer) {
+            connection.query("DELETE from department WHERE name= ?", [answer.removeDept], function (err, res) {
+                if (err) throw err;
+                console.log("\n");
+                console.table(res);
+                console.log("Department has been removed!");
+                start();
+
+            });
+        });
+
+    });
+}
+
+function removeRole() {
+    connection.query("SELECT title FROM roles", function (err, result) {
+        if (err) throw err;
+        console.log("\n");
+        console.table(result);
+
+        var roles = [];
+        for (var i = 0; i < result.length; i++) {
+            roles.push(result[i].title)
+        }
+        inquirer.prompt([
+            {
+                type: "list",
+                name: "removeRole",
+                message: "Which role do you want to remove?",
+                choices: roles
+            }
+        ]).then(function (answer) {
+            connection.query("DELETE from roles WHERE title= ?", [answer.removeRole], function (err, res) {
+                if (err) throw err;
+                console.log("\n");
+                console.table(res);
+                console.log("Role has been removed!");
+                start();
+
+            });
+        });
+
+    });
+}
+
+
 
 function quit() {
     console.log("Goodbye!");
